@@ -1,6 +1,6 @@
 var pdfreader = require('pdfreader');
-
-var rows = {}; // indexed by y-position
+var fs = require('fs')
+var rows = {};
 var stuArr = [];
 var obj = {};
 var subject = [];
@@ -21,18 +21,12 @@ function printRows() {
       stuArr.push((rows[y] || []).join(''))
       subArr.push((rows[y] || []).join(''))
     });
-  if (stuArr[0] === 'RESULT' && flag === true) {
-    flag = false;
+  if (stuArr[0] === 'RESULT') {
     parseStudentPage();
   } else {
     parseSubjectPage();
   }
 }
-
-// var k = 1;
-// var interval = setInterval(function () {
-//   //console.log(k + '.pdf');
-//new pdfreader.PdfReader().parseFileItems('separate/' + k + '.pdf', function (err, item) {
 new pdfreader.PdfReader().parseFileItems('result.pdf', function (err, item) {
   if (!item || item.page) {
     // end of file, or page
@@ -43,11 +37,6 @@ new pdfreader.PdfReader().parseFileItems('result.pdf', function (err, item) {
     (rows[item.y] = rows[item.y] || []).push(item.text);
   }
 });
-//   k++;
-//   if (k >= 3) {
-//     clearInterval(interval);
-//   }
-// }, 3);
 
 function parseStudentPage() {
   if (stuArr[0] === 'RESULT') {
@@ -77,7 +66,7 @@ function parseSubjectPage() {
   }
   //console.log(subArr)
 
-  while (subArr.length > 1) {
+  while (subArr.length > 6) {
     z = 0;
     itotal = 0;
     marks = {}
@@ -97,7 +86,8 @@ function parseSubjectPage() {
       i++;
     }
     obj['total'] = itotal;
-    obj['percentage'] = itotal / subject.length;
+    obj['percentage'] = itotal *2 / m.length;
+    //console.log(m.length/2)
     //console.log(marks);
     obj['marks'] = marks;
     students[obj.enroll] = obj;
@@ -106,5 +96,13 @@ function parseSubjectPage() {
 
   }
 
-  console.log(students)
+  // console.log(students)
+  //var jsonContent = JSON.stringify(students);
+  var jsonContent=  JSON.stringify(students, null, 4)
+fs.writeFile("output.json", jsonContent, 'utf8', function (err) {
+    if (err) {
+        console.log("An error occured while writing JSON Object to File.");
+    }
+});
 }
+
