@@ -11,6 +11,8 @@ var institute;
 var imarks = {}
 var z = 0;
 var itotal = 0;
+var source = process.argv[2];
+var destination = process.argv[3];
 
 function printRows() {
   stuArr = [];
@@ -27,7 +29,7 @@ function printRows() {
     parseSubjectPage();
   }
 }
-new pdfreader.PdfReader().parseFileItems('result.pdf', function (err, item) {
+new pdfreader.PdfReader().parseFileItems(source, function (err, item) {
   if (!item || item.page) {
     // end of file, or page
     printRows();
@@ -99,7 +101,7 @@ function parseSubjectPage() {
   // console.log(students)
   //var jsonContent = JSON.stringify(students);
   var jsonContent=  JSON.stringify(students, null, 4)
-fs.writeFile("output.json", jsonContent, 'utf8', function (err) {
+fs.writeFile(destination, jsonContent, 'utf8', function (err) {
     if (err) {
         console.log("An error occured while writing JSON Object to File.");
     }
