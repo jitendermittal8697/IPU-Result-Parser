@@ -6,13 +6,13 @@ var obj = {};
 var subject = [];
 var subArr = [];
 var students = {};
-var flag = true;
 var institute;
 var imarks = {}
 var z = 0;
 var itotal = 0;
 var source = process.argv[2];
 var destination = process.argv[3];
+
 
 function printRows() {
   stuArr = [];
@@ -54,32 +54,46 @@ function parseStudentPage() {
         subject.push(i.substr(14, x - 6) + str);
       }
     })
-    //console.log(subject)
   }
 }
 
 function parseSubjectPage() {
   subArr.splice(0, 13);
-  subArr.splice(subArr.length - 4, 4);
   if (subArr.length > 1) {
     institute = (subArr[0].substr(subArr[0].lastIndexOf("Institution: ") + "Institution: ".length, subArr[0].length - subArr[0].lastIndexOf("Institution: ")))
+    enroll = (subArr[1].substr(0,11));
     subArr.splice(0, 3);
 
   }
-  //console.log(subArr)
-
   while (subArr.length > 6) {
+    if(enroll.length < 11)
+    {
+      enroll = (subArr[6].substr(0,11));
+      subArr.splice(0, 8);
+      continue;
+    }
     z = 0;
     itotal = 0;
     marks = {}
     obj = {}
     obj.name = subArr[0];
-    obj.enroll = subArr[1].substr(subArr[1].lastIndexOf("SID: ") + "SID: ".length, subArr[1].length - subArr[1].lastIndexOf("SID: "))
+    obj.enroll = enroll;
+    enroll = (subArr[6].substr(0,11));
     obj.institute = institute;
-    var arr = subArr[2].split('  ').join(',')
-    var m = arr.split(',')
+    var arr = subArr[2]
+    //var m = arr.split(',')
+    //var res = arr.replace(/[C]/g, " C ");
+    var res1 = arr.replace(/[A]/g, " A ");
+    var res2 = res1.replace(/[-]/g, " - ");
+    var res3 = res2.split("  ").join(" ");
+    var res4 = res3.trim();
+    var m = res4.split(" ")
     for (var i = 0; i < m.length; i++) {
       imarks = {}
+      if(isNaN(parseInt(m[i])))
+        m[i]=0;
+      if(isNaN(parseInt(m[i+1])))
+        m[i+1]=0;
       imarks.sessional = parseInt(m[i])
       imarks.external = parseInt(m[i + 1]);
       imarks.total = parseInt(m[i]) + parseInt(m[i + 1]);
@@ -89,18 +103,11 @@ function parseSubjectPage() {
     }
     obj['total'] = itotal;
     obj['percentage'] = itotal *2 / m.length;
-    //console.log(m.length/2)
-    //console.log(marks);
     obj['marks'] = marks;
     students[obj.enroll] = obj;
     subArr.splice(0, 8);
-    //console.log(students)
-
-  }
-
-  // console.log(students)
-  //var jsonContent = JSON.stringify(students);
-  var jsonContent=  JSON.stringify(students, null, 4)
+}
+var jsonContent=  JSON.stringify(students, null, 4)
 fs.writeFile(destination, jsonContent, 'utf8', function (err) {
     if (err) {
         console.log("An error occured while writing JSON Object to File.");
